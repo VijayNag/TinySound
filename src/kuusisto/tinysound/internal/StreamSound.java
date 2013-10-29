@@ -29,6 +29,8 @@ package kuusisto.tinysound.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import kuusisto.tinysound.Sound;
 
@@ -40,7 +42,8 @@ import kuusisto.tinysound.Sound;
  */
 public class StreamSound implements Sound {
 	
-	private URL dataURL;
+	private final static Logger LOGGER = Logger.getLogger(StreamSound.class .getName());
+        private URL dataURL;
 	private long numBytesPerChannel;
 	private Mixer mixer;
 	private final int ID;
@@ -98,7 +101,7 @@ public class StreamSound implements Sound {
 					this.numBytesPerChannel, volume, pan, this.ID);
 			this.mixer.registerSoundReference(ref);
 		} catch (IOException e) {
-			System.err.println("Failed to open stream for Sound");
+			LOGGER.log(Level.SEVERE, "Failed to open stream for Sound");
 		}
 	}
 
@@ -265,7 +268,7 @@ public class StreamSound implements Sound {
 				//this shouldn't happen if the bytes were written correctly to
 				//the temp file, but this sound should now be invalid at least
 				this.position = this.numBytesPerChannel;
-				System.err.println("Failed reading bytes for stream sound");
+				LOGGER.log(Level.SEVERE, "Failed reading bytes for stream sound");
 			}
 			//copy the values into the caller buffer
 			if (bigEndian) {

@@ -29,6 +29,8 @@ package kuusisto.tinysound.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import kuusisto.tinysound.Music;
 import kuusisto.tinysound.TinySound;
@@ -40,6 +42,8 @@ import kuusisto.tinysound.TinySound;
  * @author Finn Kuusisto
  */
 public class StreamMusic implements Music {
+    
+        private final static Logger LOGGER = Logger.getLogger(StreamMusic.class .getName());
 	
 	private URL dataURL;
 	private Mixer mixer;
@@ -213,7 +217,7 @@ public class StreamMusic implements Music {
 		//get the byte index for a channel
 		int bytesPerChannelForFrame = TinySound.FORMAT.getFrameSize() /
 			TinySound.FORMAT.getChannels();
-		long byteIndex = (long)(frameIndex * bytesPerChannelForFrame);
+		long byteIndex = (frameIndex * bytesPerChannelForFrame);
 		this.reference.setLoopPosition(byteIndex);
 	}
 
@@ -436,7 +440,7 @@ public class StreamMusic implements Music {
 						this.position = 0;
 						this.skipBytes(position);
 					} catch (IOException e) {
-						System.err.println("Failed to open stream for StreamMusic");
+						LOGGER.log(Level.SEVERE, "Failed to open stream for StreamMusic");
 						this.playing = false;
 					}
 				}
@@ -575,7 +579,7 @@ public class StreamMusic implements Music {
 				//this shouldn't happen if the bytes were written correctly to
 				//the temp file, but this sound should now be invalid at least
 				this.position = this.numBytesPerChannel;
-				System.err.println("Failed reading bytes for stream sound");
+				LOGGER.log(Level.SEVERE, "Failed reading bytes for stream sound");
 			}
 			//copy the values into the caller buffer
 			if (bigEndian) {
