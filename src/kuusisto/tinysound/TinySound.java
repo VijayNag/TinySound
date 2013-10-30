@@ -715,41 +715,14 @@ public class TinySound {
 		//assuming 8-bit, 2-channel to 16-bit, 2-channel
 		byte[] newData = null;
 		try {
-			byte[] data = TinySound.getBytes(stream);
-			int newNumBytes = data.length * 2 * 2;
-			//check if size overflowed
-			if (newNumBytes < 0) {
-				LOGGER.log(Level.SEVERE, "Audio resource too long!");
-				return null;
-			}
+                        byte[] data     = TinySound.getBytes(stream);
+			int newNumBytes = calculateByteLength(data);
 			newData = new byte[newNumBytes];
 			for (int i = 0, j = 0; i < data.length; i += 2, j += 4) {
 				//convert them to doubles
 				double leftFloatVal = data[i];
 				double rightFloatVal = data[i + 1];
-				leftFloatVal /= (leftFloatVal < 0) ? 128 : 127;
-				rightFloatVal /= (rightFloatVal < 0) ? 128 : 127;
-				if (leftFloatVal < -1.0) { //just in case
-					leftFloatVal = -1.0;
-				}
-				else if (leftFloatVal > 1.0) {
-					leftFloatVal = 1.0;
-				}
-				if (rightFloatVal < -1.0) { //just in case
-					rightFloatVal = -1.0;
-				}
-				else if (rightFloatVal > 1.0) {
-					rightFloatVal = 1.0;
-				}
-				//convert them to ints and then to 2 bytes each
-				int leftVal = (int)(leftFloatVal * Short.MAX_VALUE);
-				int rightVal = (int)(rightFloatVal * Short.MAX_VALUE);
-				//left channel bytes
-				newData[j + 1] = (byte)((leftVal >> 8) & 0xFF); //MSB
-				newData[j] = (byte)(leftVal & 0xFF); //LSB
-				//then right channel bytes
-				newData[j + 3] = (byte)((rightVal >> 8) & 0xFF); //MSB
-				newData[j + 2] = (byte)(rightVal & 0xFF); //LSB
+				setBytes(newData, leftFloatVal, rightFloatVal, i, j);
 			}
 		}
 		catch (IOException e) {
@@ -764,6 +737,55 @@ public class TinySound {
 		return new AudioInputStream(new ByteArrayInputStream(newData), stereo16,
 				newData.length / 4);
 	}
+        
+        /**
+         * Set appropiate bytes as stereo audio
+         * @param newData
+         * @param leftFloatVal
+         * @param rightFloatVal
+         * @param i
+         * @param j 
+         */
+        private static void setBytes(byte[] newData, double leftFloatVal, double rightFloatVal, int i, int j) {
+                leftFloatVal /= (leftFloatVal < 0) ? 128 : 127;
+                rightFloatVal /= (rightFloatVal < 0) ? 128 : 127;
+                if (leftFloatVal < -1.0) { //just in case
+                        leftFloatVal = -1.0;
+                }
+                else if (leftFloatVal > 1.0) {
+                        leftFloatVal = 1.0;
+                }
+                if (rightFloatVal < -1.0) { //just in case
+                        rightFloatVal = -1.0;
+                }
+                else if (rightFloatVal > 1.0) {
+                        rightFloatVal = 1.0;
+                }
+                //convert them to ints and then to 2 bytes each
+                int leftVal = (int)(leftFloatVal * Short.MAX_VALUE);
+                int rightVal = (int)(rightFloatVal * Short.MAX_VALUE);
+                //left channel bytes
+                newData[j + 1] = (byte)((leftVal >> 8) & 0xFF); //MSB
+                newData[j] = (byte)(leftVal & 0xFF); //LSB
+                //then right channel bytes
+                newData[j + 3] = (byte)((rightVal >> 8) & 0xFF); //MSB
+                newData[j + 2] = (byte)(rightVal & 0xFF); //LSB
+        }
+        
+        /**
+         * Calculate actual byte length for audio data
+         * @param data
+         * @return 
+         */
+        private static int calculateByteLength(byte[] data) {
+            int newNumBytes = data.length * 2 * 2;
+            //check if size overflowed
+            if (newNumBytes < 0) {
+                    LOGGER.log(Level.SEVERE, "Audio resource too long!");
+                    return 0;
+            }
+            return newNumBytes;
+        }
 	
 	/**
 	 * Read all of the bytes from an AudioInputStream.
