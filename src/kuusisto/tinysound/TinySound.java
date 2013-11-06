@@ -67,7 +67,7 @@ public class TinySound {
 	
 	public static final String VERSION = "1.1.0";
         private final static Logger LOGGER = Logger.getLogger(TinySound.class .getName());
-        
+        private static final String ERROR_READING_BYTES = "Error reading all bytes from stream!";
 	/**
 	 * The internal format used by TinySound.
 	 */
@@ -535,7 +535,7 @@ public class TinySound {
 			data = TinySound.getBytes(stream);
 		}
 		catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "Error reading all bytes from stream!");
+			LOGGER.log(Level.SEVERE, ERROR_READING_BYTES);
 			return null;
 		}
 		finally {
@@ -568,7 +568,7 @@ public class TinySound {
 			data[1] = right;
 		}
 		catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "Error reading all bytes from stream!");
+			LOGGER.log(Level.SEVERE, ERROR_READING_BYTES);
 			return null;
 		}
 		finally {
@@ -693,7 +693,7 @@ public class TinySound {
 			}
 		}
 		catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "Error reading all bytes from stream!");
+			LOGGER.log(Level.SEVERE, ERROR_READING_BYTES);
 			return null;
 		}
 		finally {
@@ -726,7 +726,7 @@ public class TinySound {
 			}
 		}
 		catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "Error reading all bytes from stream!");
+			LOGGER.log(Level.SEVERE, ERROR_READING_BYTES);
 			return null;
 		}
 		finally {

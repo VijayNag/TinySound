@@ -53,8 +53,15 @@ public class MemMusic implements Music {
 		this.left = left;
 		this.right = right;
 		this.mixer = mixer;
-		this.reference = new MemMusicReference(this.left, this.right, false,
-				false, 0, 0, 1.0, 0.0);
+                MusicSettings settings = new MusicSettings();
+                settings.setPlaying(false);
+                settings.setLoop(false);
+                settings.setLoopPosition(0);
+                settings.setPosition(0);
+                settings.setVolume(1.0);
+                settings.setPan(0.0);
+                
+		this.reference = new MemMusicReference(this.left, this.right, settings);
 		this.mixer.registerMusicReference(this.reference);
 	}
 	
@@ -281,6 +288,53 @@ public class MemMusic implements Music {
 		this.right = null;
 		this.reference = null;
 	}
+        
+        private class MusicSettings {
+                private boolean playing;
+		private boolean loop;
+		private int loopPosition;
+		private int position;
+		private double volume;
+		private double pan;
+                
+                public boolean getPlaying() {
+                    return playing;
+                }
+                public void setPlaying(boolean playing) {
+                    this.playing = playing;
+                }
+                public boolean getLoop() {
+                    return loop;
+                }
+                public void setLoop(boolean loop) {
+                    this.loop = loop;
+                }
+                public int getLoopPosition() {
+                    return loopPosition;
+                }
+                public void setLoopPosition(int loopPosition) {
+                    this.loopPosition = loopPosition;
+                }
+                public int getPosition() {
+                    return position;
+                }
+                public void setPosition(int position) {
+                    this.position = position;
+                }
+                public double getVolume() {
+                    return volume;
+                }
+                public void setVolume(double volume) {
+                    this.volume = position;
+                }
+                public double getPan() {
+                    return pan;
+                }
+                public void setPan(double pan) {
+                    this.pan = pan;
+                }
+        }
+        
 	
 	/////////////
 	//Reference//
@@ -315,17 +369,15 @@ public class MemMusic implements Music {
 		 * @param volume volume to play the music
 		 * @param pan pan to play the music
 		 */
-		public MemMusicReference(byte[] left, byte[] right, boolean playing,
-				boolean loop, int loopPosition, int position, double volume,
-				double pan) {
+		public MemMusicReference(byte[] left, byte[] right, MusicSettings settings) {
 			this.left = left;
 			this.right = right;
-			this.playing = playing;
-			this.loop = loop;
-			this.loopPosition = loopPosition;
-			this.position = position;
-			this.volume = volume;
-			this.pan = pan;
+			this.playing = settings.getPlaying();
+			this.loop = settings.getLoop();
+			this.loopPosition = settings.getLoopPosition();
+			this.position = settings.getPosition();
+			this.volume = settings.getVolume();
+			this.pan = settings.getPan();
 		}
 		
 		/**
