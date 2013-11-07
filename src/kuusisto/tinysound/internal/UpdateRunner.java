@@ -41,7 +41,7 @@ import kuusisto.tinysound.TinySound;
  */
 public class UpdateRunner implements Runnable {
 		
-		private AtomicBoolean running;
+		private UpdateRunnerProduct updateRunnerProduct = new UpdateRunnerProduct();
 		private SourceDataLine outLine;
 		private Mixer mixer;
 		
@@ -51,7 +51,7 @@ public class UpdateRunner implements Runnable {
 		 * @param outLine the line to write audio data to
 		 */
 		public UpdateRunner(Mixer mixer, SourceDataLine outLine) {
-			this.running = new AtomicBoolean();
+			updateRunnerProduct.setRunning(new AtomicBoolean());
 			this.mixer = mixer;
 			this.outLine = outLine;
 		}
@@ -60,13 +60,13 @@ public class UpdateRunner implements Runnable {
 		 * Stop this UpdateRunner from updating the TinySound system.
 		 */
 		public void stop() {
-			this.running.set(false);
+			updateRunnerProduct.stop();
 		}
 
 		@Override
 		public void run() {
 			//mark the updater as running
-			this.running.set(true);
+			this.updateRunnerProduct.getRunning().set(true);
 			//1-sec buffer
 			int bufSize = (int)TinySound.FORMAT.getFrameRate() *
 				TinySound.FORMAT.getFrameSize();
@@ -78,7 +78,7 @@ public class UpdateRunner implements Runnable {
 			double framesAccrued = 0;
 			long lastUpdate = System.nanoTime();
 			//keep running until told to stop
-			while (this.running.get()) {
+			while (this.updateRunnerProduct.getRunning().get()) {
 				//check the time
 				long currTime = System.nanoTime();
 				//accrue frames

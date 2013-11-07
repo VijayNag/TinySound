@@ -301,10 +301,10 @@ public class StreamMusic implements Music {
 	 */
 	private static class StreamMusicReference implements MusicReference {
 		
+		private StreamMusicReferenceProduct streamMusicReferenceProduct = new StreamMusicReferenceProduct();
 		private URL url;
 		private InputStream data;
 		private long numBytesPerChannel; //not per frame, but the whole sound
-		private byte[] buf;
 		private byte[] skipBuf;
 		private boolean playing;
 		private boolean loop;
@@ -338,7 +338,7 @@ public class StreamMusic implements Music {
 			this.numBytesPerChannel = numBytesPerChannel;
 			this.volume = volume;
 			this.pan = pan;
-			this.buf = new byte[4];
+			streamMusicReferenceProduct.setBuf(new byte[4]);
 			this.skipBuf = new byte[50];
 			//now get the data stream
 			this.data = this.url.openStream();
@@ -526,27 +526,7 @@ public class StreamMusic implements Music {
 					return;
 				}
 			}
-			//this is the number of bytes to skip per channel, so double it
-			long numSkip = num * 2;
-			//spin read since skip is not always supported apparently and won't
-			//guarantee a correct skip amount
-			int tmpRead = 0;
-			int numRead = 0;
-			try {
-				while (numRead < numSkip && tmpRead != -1) {
-					//determine safe length to read
-					long remaining = numSkip - numRead;
-					int len = remaining > this.skipBuf.length ?
-							this.skipBuf.length : (int)remaining;
-					//and read
-					tmpRead = this.data.read(this.skipBuf, 0, len);
-					numRead += tmpRead;
-				}
-			} catch (IOException e) {
-				//hmm... I guess invalidate this reference
-				this.position = this.numBytesPerChannel;
-				this.playing = false;
-			}
+			int tmpRead = tmpRead(num);
 			//increment the position appropriately
 			if (tmpRead == -1) { //reached end of file in the middle of reading
 				this.position = this.numBytesPerChannel;
@@ -555,6 +535,25 @@ public class StreamMusic implements Music {
 			else {
 				this.position += num;
 			}
+		}
+
+		private int tmpRead(long num) {
+			long numSkip = num * 2;
+			int tmpRead = 0;
+			int numRead = 0;
+			try {
+				while (numRead < numSkip && tmpRead != -1) {
+					long remaining = numSkip - numRead;
+					int len = remaining > this.skipBuf.length ? this.skipBuf.length
+							: (int) remaining;
+					tmpRead = this.data.read(this.skipBuf, 0, len);
+					numRead += tmpRead;
+				}
+			} catch (IOException e) {
+				this.position = this.numBytesPerChannel;
+				this.playing = false;
+			}
+			return tmpRead;
 		}
 
 		/**
@@ -570,9 +569,9 @@ public class StreamMusic implements Music {
 			int tmpRead = 0;
 			int numRead = 0;
 			try {
-				while (numRead < this.buf.length && tmpRead != -1) {
-					tmpRead = this.data.read(this.buf, numRead,
-							this.buf.length - numRead);
+				while (numRead < this.streamMusicReferenceProduct.getBuf().length && tmpRead != -1) {
+					tmpRead = this.data.read(this.streamMusicReferenceProduct.getBuf(), numRead,
+							this.streamMusicReferenceProduct.getBuf().length - numRead);
 					numRead += tmpRead;
 				}
 			} catch (IOException e) {
@@ -581,23 +580,7 @@ public class StreamMusic implements Music {
 				this.position = this.numBytesPerChannel;
 				LOGGER.log(Level.SEVERE, "Failed reading bytes for stream sound");
 			}
-			//copy the values into the caller buffer
-			if (bigEndian) {
-				//left
-				data[0] = ((this.buf[0] << 8) |
-						(this.buf[1] & 0xFF));
-				//right
-				data[1] = ((this.buf[2] << 8) |
-						(this.buf[3] & 0xFF));
-			}
-			else {
-				//left
-				data[0] = ((this.buf[1] << 8) |
-						(this.buf[0] & 0xFF));
-				//right
-				data[1] = ((this.buf[3] << 8) |
-						(this.buf[2] & 0xFF));
-			}
+			data = streamMusicReferenceProduct.data(data, bigEndian);
 			//increment the position appropriately
 			if (tmpRead == -1) { //reached end of file in the middle of reading
 				//this should never happen
