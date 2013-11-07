@@ -539,7 +539,6 @@ public class TinySound {
 			return null;
 		}
 		finally {
-			try { stream.close(); } catch (IOException e) {}
 		}
 		return data;
 	}
@@ -572,7 +571,6 @@ public class TinySound {
 			return null;
 		}
 		finally {
-			try { stream.close(); } catch (IOException e) {}
 		}
 		return data;
 	}
@@ -697,7 +695,6 @@ public class TinySound {
 			return null;
 		}
 		finally {
-			try { stream.close(); } catch (IOException e) {}
 		}
 		AudioFormat mono16 = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
 				44100, 16, 1, 2, 44100, false);
@@ -730,7 +727,6 @@ public class TinySound {
 			return null;
 		}
 		finally {
-			try { stream.close(); } catch (IOException e) {}
 		}
 		AudioFormat stereo16 = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
 				44100, 16, 2, 4, 44100, false);
